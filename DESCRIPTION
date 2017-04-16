@@ -1,0 +1,21 @@
+Package: sinsynthr
+Type: Package
+Title: sinsynthr: Single Cell RNAseq synthetic data simulator
+Version: 1.0
+Date: 2017-04-15
+Authors@R: c(
+	person("Daniel", "Wells", email = "wells@stats.ox.ac.uk", role = c("aut", "cre")))
+Description: This is an R package for simulating count data for single cell RNAseq
+License: MIT + file LICENSE
+Imports:
+	data.table,
+	ggplot2,
+	Matrix,
+	cowplot,
+	fitdistrplus
+RoxygenNote: 6.0.1
+Suggests:
+	knitr,
+	rmarkdown,
+	testthat
+VignetteBuilder: knitr
