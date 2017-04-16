@@ -27,7 +27,7 @@ dge_pca <- prcomp(normalised_dge)
 qplot(dge_pca$x[,1], dge_pca$x[,2], colour=rownames(dge_pca$x)) + labs(colour="Group", y="PC2", x="PC1")
 ```
 
-![PCA on simulated data](example.eps)
+![PCA on simulated data](example.png)
 
 For more detailed examples of how to use this package please see the [compiled vignette](https://cdn.rawgit.com/daniel-wells/sinsynthr/master/vignettes/vignette.html).
 
