@@ -29,7 +29,7 @@ qplot(dge_pca$x[,1], dge_pca$x[,2], colour=rownames(dge_pca$x)) + labs(colour="G
 
 ![PCA on simulated data](example.png)
 
-For more detailed examples of how to use this package please see the [compiled vignette](https://cdn.rawgit.com/daniel-wells/sinsynthr/master/vignettes/vignette.html).
+For more detailed examples of how to use this package please see the [compiled vignette](https://rawgit.com/daniel-wells/sinsynthr/master/vignettes/vignette.html).
 
 ## Directory Organisation
 The [R/](R/) directory contains source code of the functions to simulate the data.
