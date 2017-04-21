@@ -17,20 +17,20 @@
 
 fit_parameters <- function(data, plot=TRUE, method="mge", ...){
   # Dropseq normalise to estimate mean dist params
-  lib.sizes <- colSums(data)
-  norm.counts <- sweep(data, 2, lib.sizes / median(sqrt(lib.sizes)), "/")
-  norm.counts <- norm.counts[rowSums(norm.counts > 0) >= 1, ]
+  library_sizes <- colSums(data)
+  normalised_counts <- sweep(data, 2, library_sizes / median(sqrt(library_sizes)), "/")
+  normalised_counts <- normalised_counts[rowSums(normalised_counts > 0) >= 1, ]
   
   # Fit gene mean parameters
-  mean_var_n <- summariseDGE(norm.counts)
+  summarised_counts <- summariseDGE(normalised_counts)
   
-  lnorm_parameters <- fitdistrplus::fitdist(mean_var_n$Mean, "lnorm", method = "mge", gof="CvM")
+  lnorm_parameters <- fitdistrplus::fitdist(summarised_counts$Mean, "lnorm", method = "mge", gof="CvM")
   
   plot(lnorm_parameters)
   mtext("Gene Mean fits", outer = TRUE, cex = 1.5)
   
   # Fit cell library parameters
-  library_parameters <- fitdistrplus::fitdist(lib.sizes, "lnorm", method = "mge", gof="CvM")
+  library_parameters <- fitdistrplus::fitdist(library_sizes, "lnorm", method = "mge", gof="CvM")
   
   plot(library_parameters)
   mtext("Library Size fits", outer = TRUE, cex = 1.5)
