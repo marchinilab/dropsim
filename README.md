@@ -6,7 +6,7 @@ This is an R package for quickly simulating single cell RNAseq read count data. 
 
 ```R
 # install.packages("devtools")
-devtools::install_github("daniel-wells/sinsynthr")
+devtools::install_github("marchinilab/sinsynthr")
 ```
 
 ## Quick Start
