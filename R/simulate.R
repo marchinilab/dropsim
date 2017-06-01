@@ -149,7 +149,7 @@ normaliseDGE <- function(dge, verbose=FALSE, center=TRUE, scale=TRUE, threshold 
   
   # subset cells and genes
   cell_subset <- library_size > min_library_size
-  gene_mean <- rowMeans(dge)
+  gene_mean <- rowMeans(dge[, cell_subset])
   gene_subset <- data.table(gene_mean, names(gene_mean))[order(-gene_mean)][1:round(length(gene_mean) / 2)]$V2
   
   dge <- dge[gene_subset, cell_subset]
