@@ -56,7 +56,7 @@ sinsynthr_parameters <- setClass("sinsynthr_parameters",
 #' 
 #' @param cell_prefix character; the default group name for cells
 #' 
-#' @return A matrix of read counts
+#' @return A list containing a matrix of read counts, true underlying expression values and fold change in expression for the groups simulated
 #'
 #' @examples
 #' # new_parameters <- sinsynthr_parameters()
@@ -68,54 +68,67 @@ simulateDGE <- function(parameters, sparse=TRUE, cell_prefix = "cell", dge=TRUE)
   
   if (class(parameters)!="sinsynthr_parameters") stop("parameters should be a 'sinsynthr_parameters' object")
   
-  true_means <- matrix(rep(rlnorm(n = parameters@n_genes,
-                                  meanlog = parameters@gene_meanlog,
-                                  sdlog = parameters@gene_sdlog),
-                           times = parameters@n_cells),
-                       ncol = parameters@n_cells)
+  true_expression_vector <- rlnorm(n = parameters@n_genes,
+                                   meanlog = parameters@gene_meanlog,
+                                   sdlog = parameters@gene_sdlog)
+  
+  true_expression <- matrix(rep(true_expression_vector,
+                                times = parameters@n_cells),
+                            ncol = parameters@n_cells)
   
   library_sizes <- rlnorm(n = parameters@n_cells,
                           meanlog = parameters@library_meanlog,
                           sdlog = parameters@library_sdlog)
   
-  colnames(true_means) <- rep(cell_prefix, parameters@n_cells)
+  colnames(true_expression) <- rep(cell_prefix, parameters@n_cells)
+  
+  fold_change_matrix <- matrix(nrow=parameters@n_genes, ncol=length(parameters@groups$scale))
+  colnames(fold_change_matrix) <- parameters@groups$names
+  names(dimnames(fold_change_matrix)) <- c("gene", "group")
   
   for (group in seq_along(parameters@groups$scale)){
     
     cell_indexes <- parameters@groups$cells[[group]]
     
     # simulate fold changes for the groupings
-    fold_change <- exp(rlogis(n = parameters@n_genes,
-                              location = 0.0,
-                              scale = parameters@groups$scale[group]))
+    fold_change_matrix[,group] <- exp(rlogis(n = parameters@n_genes,
+                                             location = 0.0,
+                                             scale = parameters@groups$scale[group]))
     
     # apply differential expression
-    true_means[, cell_indexes] <- true_means[, cell_indexes] * (matrix(rep(fold_change, times = length(cell_indexes)),
+    true_expression[, cell_indexes] <- true_expression[, cell_indexes] * (matrix(rep(fold_change_matrix[,group], times = length(cell_indexes)),
                                                                      ncol = length(cell_indexes)))
     
-    colnames(true_means)[cell_indexes] <- paste0(colnames(true_means)[cell_indexes],
+    colnames(true_expression)[cell_indexes] <- paste0(colnames(true_expression)[cell_indexes],
                                                  parameters@groups$names[group])
     
   }
   
   # Convert means to counts
   
-  true_means_t <- t(true_means)
+  true_expression_t <- t(true_expression)
   
-  corrected_means <- true_means_t * (library_sizes / rowSums(true_means_t))
+  corrected_means <- true_expression_t * (library_sizes / rowSums(true_expression_t))
   
   counts <- Matrix(rpois(parameters@n_cells * parameters@n_genes, lambda = corrected_means),
                    nrow = parameters@n_cells, ncol = parameters@n_genes, sparse = sparse)
   
   # add labels to counts
   colnames(counts) <- 1:parameters@n_genes
-  rownames(counts) <- rownames(true_means_t)
+  rownames(counts) <- rownames(true_expression_t)
+  names(dimnames(counts)) <- c("cell","gene")
+  
+  names(true_expression_vector) <- 1:parameters@n_genes
+  rownames(fold_change_matrix) <- 1:parameters@n_genes
   
   if (dge == TRUE){  
     counts <- t(counts)
   }
   
-  return(counts)
+  return(list(counts = counts,
+              true_expression = true_expression_vector,
+              fold_change = fold_change_matrix,
+              library_sizes = library_sizes))
 }
 
 

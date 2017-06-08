@@ -1,7 +1,7 @@
 sinsynthr: Single Cell RNA-seq Synthetic Data Simulator
 ================
 Daniel Wells
-2017-04-21
+2017-06-08
 
 Model Description
 -----------------
@@ -34,15 +34,15 @@ new_parameters <- new("sinsynthr_parameters",
                       )
 
 # Simulate counts
-dge <- simulateDGE(new_parameters)
+dge <- simulateDGE(new_parameters)$counts
 
 str(as.matrix(dge))
 ```
 
-    ##  num [1:15000, 1:1000] 0 2 0 0 1 0 5 1 1 0 ...
+    ##  num [1:15000, 1:1000] 0 0 0 0 0 0 0 0 1 0 ...
     ##  - attr(*, "dimnames")=List of 2
-    ##   ..$ : chr [1:15000] "1" "2" "3" "4" ...
-    ##   ..$ : chr [1:1000] "cellA" "cellA" "cellA2" "cellA" ...
+    ##   ..$ gene: chr [1:15000] "1" "2" "3" "4" ...
+    ##   ..$ cell: chr [1:1000] "cellA" "cellA" "cellA" "cellA" ...
 
 Summary Plots
 -------------
@@ -83,7 +83,7 @@ Comparisons
 If we have multiple datasets we can do comparisons
 
 ``` r
-summarised_dge_2 <- summariseDGE(simulateDGE(sinsynthr_parameters()), name="Simulation 2")
+summarised_dge_2 <- summariseDGE(simulateDGE(sinsynthr_parameters())$counts, name="Simulation 2")
 dispersionDGE(rbind(summarised_dge, summarised_dge_2)) + facet_wrap(~Name)
 ```
 
@@ -113,19 +113,19 @@ print(new_parameters)
     ## 
     ## Slot "gene_meanlog":
     ##   meanlog 
-    ## -7.402197 
+    ## -7.431332 
     ## 
     ## Slot "gene_sdlog":
     ##    sdlog 
-    ## 2.265792 
+    ## 2.265403 
     ## 
     ## Slot "library_meanlog":
     ##  meanlog 
-    ## 9.587864 
+    ## 9.560845 
     ## 
     ## Slot "library_sdlog":
     ##     sdlog 
-    ## 0.3609756 
+    ## 0.3729606 
     ## 
     ## Slot "groups":
     ## Empty data.table (0 rows) of 3 cols: scale,cells,names

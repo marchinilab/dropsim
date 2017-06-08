@@ -17,10 +17,10 @@ library(sinsynthr)
 new_parameters <- sinsynthr_parameters()
 
 # Simulate counts
-dge <- simulateDGE(new_parameters)
+simulation <- simulateDGE(new_parameters)
 
 # Normalise Counts matrix
-normalised_dge <- normaliseDGE(dge)
+normalised_dge <- normaliseDGE(simulation$counts)
 
 # Do a PCA to check
 dge_pca <- prcomp(normalised_dge)

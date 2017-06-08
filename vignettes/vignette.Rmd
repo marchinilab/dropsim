@@ -53,7 +53,7 @@ new_parameters <- new("sinsynthr_parameters",
                       )
 
 # Simulate counts
-dge <- simulateDGE(new_parameters)
+dge <- simulateDGE(new_parameters)$counts
 
 str(as.matrix(dge))
 ```
@@ -85,7 +85,7 @@ qplot(dge_pca$x[,1], dge_pca$x[,2], colour=rownames(dge_pca$x)) + labs(colour="G
 ## Comparisons
 If we have multiple datasets we can do comparisons
 ```{r compare, fig.width=9, fig.height=6, warning=FALSE}
-summarised_dge_2 <- summariseDGE(simulateDGE(sinsynthr_parameters()), name="Simulation 2")
+summarised_dge_2 <- summariseDGE(simulateDGE(sinsynthr_parameters())$counts, name="Simulation 2")
 dispersionDGE(rbind(summarised_dge, summarised_dge_2)) + facet_wrap(~Name)
 ```
 
