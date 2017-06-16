@@ -4,7 +4,8 @@
 \alias{simulateDGE}
 \title{Simulate Single Cell RNAseq count data}
 \usage{
-simulateDGE(parameters, sparse = TRUE, cell_prefix = "cell", dge = TRUE)
+simulateDGE(parameters, sparse = TRUE, cell_prefix = "cell", dge = TRUE,
+  seed = NULL)
 }
 \arguments{
 \item{parameters}{object of class sinsynthr containing parameters}
@@ -15,9 +16,12 @@ simulateDGE(parameters, sparse = TRUE, cell_prefix = "cell", dge = TRUE)
 
 \item{dge}{logical; if false counts a returned as a matrix cells by genes rather than genes by cells
 (If sparse=FALSE, setting dge=FALSE can save time on larger datasets.)}
+
+\item{seed}{integer; seed for random number generation, set this for repoduciable simulations.}
 }
 \value{
-A matrix of read counts
+A list containing a matrix of read counts, true underlying expression values,
+fold change in expression for the groups simulated, and the seed used for random number generation.
 }
 \description{
 \code{simulateDGE} simulate digital gene expression matrix containing count data from given parameters

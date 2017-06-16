@@ -56,7 +56,10 @@ sinsynthr_parameters <- setClass("sinsynthr_parameters",
 #' 
 #' @param cell_prefix character; the default group name for cells
 #' 
-#' @return A list containing a matrix of read counts, true underlying expression values and fold change in expression for the groups simulated
+#' @param seed integer; seed for random number generation, set this for repoduciable simulations.
+#' 
+#' @return A list containing a matrix of read counts, true underlying expression values,
+#' fold change in expression for the groups simulated, and the seed used for random number generation.
 #'
 #' @examples
 #' # new_parameters <- sinsynthr_parameters()
@@ -64,10 +67,15 @@ sinsynthr_parameters <- setClass("sinsynthr_parameters",
 #' @export
 #' @import data.table Matrix
 
-simulateDGE <- function(parameters, sparse=TRUE, cell_prefix = "cell", dge=TRUE){
+simulateDGE <- function(parameters, sparse=TRUE, cell_prefix = "cell", dge=TRUE, seed=NULL){
   
   if (class(parameters)!="sinsynthr_parameters") stop("parameters should be a 'sinsynthr_parameters' object")
   
+  if (is.null(seed)){
+    seed <- sample.int(2^20, 1)  
+  }
+  set.seed(seed)
+
   true_expression_vector <- rlnorm(n = parameters@n_genes,
                                    meanlog = parameters@gene_meanlog,
                                    sdlog = parameters@gene_sdlog)
@@ -128,7 +136,8 @@ simulateDGE <- function(parameters, sparse=TRUE, cell_prefix = "cell", dge=TRUE)
   return(list(counts = counts,
               true_expression = true_expression_vector,
               fold_change = fold_change_matrix,
-              library_sizes = library_sizes))
+              library_sizes = library_sizes,
+              seed = seed))
 }
 
 
