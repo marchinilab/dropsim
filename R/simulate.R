@@ -76,17 +76,17 @@ simulateDGE <- function(parameters, sparse=TRUE, cell_prefix = "cell", dge=TRUE,
   }
   set.seed(seed)
 
-  true_expression_vector <- rlnorm(n = parameters@n_genes,
+  true_expression_vector <- signif(rlnorm(n = parameters@n_genes,
                                    meanlog = parameters@gene_meanlog,
-                                   sdlog = parameters@gene_sdlog)
+                                   sdlog = parameters@gene_sdlog)) # rounding for cross-OS repoducibility
   
   true_expression <- matrix(rep(true_expression_vector,
                                 times = parameters@n_cells),
                             ncol = parameters@n_cells)
   
-  library_sizes <- rlnorm(n = parameters@n_cells,
+  library_sizes <- as.integer(rlnorm(n = parameters@n_cells,
                           meanlog = parameters@library_meanlog,
-                          sdlog = parameters@library_sdlog)
+                          sdlog = parameters@library_sdlog))
   
   colnames(true_expression) <- rep(cell_prefix, parameters@n_cells)
   
@@ -99,9 +99,9 @@ simulateDGE <- function(parameters, sparse=TRUE, cell_prefix = "cell", dge=TRUE,
     cell_indexes <- parameters@groups$cells[[group]]
     
     # simulate fold changes for the groupings
-    fold_change_matrix[,group] <- exp(rlogis(n = parameters@n_genes,
+    fold_change_matrix[,group] <- signif(exp(rlogis(n = parameters@n_genes,
                                              location = 0.0,
-                                             scale = parameters@groups$scale[group]))
+                                             scale = parameters@groups$scale[group]))) # rounding for cross-OS repoducibility
     
     # apply differential expression
     true_expression[, cell_indexes] <- true_expression[, cell_indexes] * (matrix(rep(fold_change_matrix[,group], times = length(cell_indexes)),
