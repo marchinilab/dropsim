@@ -146,7 +146,7 @@ simulateDGE <- function(parameters, sparse=TRUE, cell_prefix = "cell", dge=TRUE,
 #' \code{normaliseDGE} simulate digital gene expression matrix containing count data from given parameters
 #'
 #'
-#' @param dge matrix; a digital gene expression matrix containing count data
+#' @param dge matrix; a digital gene expression matrix containing count data (columns = cells, rows = genes)
 #'
 #' @param center logical; if true genes are centered to mean of 0
 #' 
@@ -154,6 +154,8 @@ simulateDGE <- function(parameters, sparse=TRUE, cell_prefix = "cell", dge=TRUE,
 #' (If sparse=FALSE, setting dge=FALSE can save time on larger datasets.)
 #' 
 #' @param threshold integer; any values larger than this will be rounded down
+#' 
+#' @param gene_subset real; what fraction of the genes do you want to keep (by mean) e.g. 0.5 is top half most expressed
 #' 
 #' @param verbose logical; if TRUE the function will print diagnostic graphs along the way
 #' 
@@ -164,7 +166,7 @@ simulateDGE <- function(parameters, sparse=TRUE, cell_prefix = "cell", dge=TRUE,
 #' @export
 #' @import data.table Matrix
 #' 
-normaliseDGE <- function(dge, verbose=FALSE, center=TRUE, scale=TRUE, threshold = 5, min_library_size=1){
+normaliseDGE <- function(dge, verbose=FALSE, center=TRUE, scale=TRUE, threshold = 5, min_library_size=50, gene_subset=0.5){
   
   library_size <- colSums(dge)
   dge <- sweep(dge, 2, library_size / median(sqrt(library_size)), "/")
@@ -172,7 +174,7 @@ normaliseDGE <- function(dge, verbose=FALSE, center=TRUE, scale=TRUE, threshold 
   # subset cells and genes
   cell_subset <- library_size > min_library_size
   gene_mean <- rowMeans(dge[, cell_subset])
-  gene_subset <- data.table(gene_mean, names(gene_mean))[order(-gene_mean)][1:round(length(gene_mean) / 2)]$V2
+  gene_subset <- data.table(gene_mean, names(gene_mean))[order(-gene_mean)][1:round(length(gene_mean) * gene_subset)]$V2
   
   dge <- dge[gene_subset, cell_subset]
   
@@ -186,7 +188,7 @@ normaliseDGE <- function(dge, verbose=FALSE, center=TRUE, scale=TRUE, threshold 
   if(verbose){
     str(dge)
     
-    hist(dge, breaks = 2000, ylim = c(0, 3e4), xlim=c(0,26), xlab="Expression", main="Histogram of data post cell-wise (& sqrt) normalisation")
+    hist(dge, breaks = 2000, ylim = c(0, 1e5), xlim=c(0,50), xlab="Expression", main="Histogram of data post cell-wise (& sqrt) normalisation")
   }
   
   # scale to unit variance all columns (genes) - don't center so 0 values remain exactly 0 and all data >= 0
