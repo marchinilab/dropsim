@@ -169,7 +169,8 @@ simulateDGE <- function(parameters, sparse=TRUE, cell_prefix = "cell", dge=TRUE,
 normaliseDGE <- function(dge, verbose=FALSE, center=TRUE, scale=TRUE, threshold = 5, min_library_size=50, gene_subset=0.5){
   
   library_size <- colSums(dge)
-  dge <- sweep(dge, 2, library_size / median(sqrt(library_size)), "/")
+  lib_size_correction_factor <- library_size / median(sqrt(library_size))
+  dge <- t(t(dge) / lib_size_correction_factor) # sweep(dge, 2, , "/")
   
   # subset cells and genes
   cell_subset <- library_size > min_library_size
@@ -200,7 +201,19 @@ normaliseDGE <- function(dge, verbose=FALSE, center=TRUE, scale=TRUE, threshold 
   }
   
   # scale to unit variance all columns (genes) - don't center so 0 values remain exactly 0 and all data >= 0
-  dge <- scale(dge, center = center, scale = scale)
+  #dge <- scale(dge, center = center, scale = scale)
+  
+  colSdColMeans <- function(x, na.rm=TRUE) {
+    if (na.rm) {
+      n <- colSums(!is.na(x)) # thanks @flodel
+    } else {
+      n <- nrow(x)
+    }
+    colVar <- colMeans(x*x, na.rm=na.rm) - (colMeans(x, na.rm=na.rm))^2
+    return(sqrt(colVar * n/(n-1)))
+  }
+  
+  dge <- t(t(dge) / colSdColMeans(dge)) #, na.rm=TRUE
   dge <- dge[, !is.na(colSums(dge))] # remove NA genes (sd calculation fails if all 0s)
   
   if(verbose){
