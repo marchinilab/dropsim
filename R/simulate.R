@@ -146,18 +146,21 @@ simulateDGE <- function(parameters, sparse=TRUE, cell_prefix = "cell", dge=TRUE,
 #' \code{normaliseDGE} simulate digital gene expression matrix containing count data from given parameters
 #'
 #'
-#' @param dge matrix; a digital gene expression matrix containing count data (columns = cells, rows = genes)
+#' @param dge matrix; a digital gene expression matrix containing count data (columns = cells, rows = genes), can be a sparce Matrix object.
 #'
 #' @param center logical; if true genes are centered to mean of 0
 #' 
 #' @param scale logical; if TRUE genes are scaled to unit variance
-#' (If sparse=FALSE, setting dge=FALSE can save time on larger datasets.)
 #' 
-#' @param threshold integer; any values larger than this will be rounded down
+#' @param threshold integer; any normalised values larger than this will be rounded down
 #' 
 #' @param gene_subset real; what fraction of the genes do you want to keep (by mean) e.g. 0.5 is top half most expressed
 #' 
+#' @param min_library_size real; only cells with library size equal or greater to this will be kept
+#' 
 #' @param verbose logical; if TRUE the function will print diagnostic graphs along the way
+#' 
+#' @param outliers logical; calculate max value per gene and cell to assess threshold position
 #' 
 #' @return A matrix of read counts
 #'
@@ -166,14 +169,14 @@ simulateDGE <- function(parameters, sparse=TRUE, cell_prefix = "cell", dge=TRUE,
 #' @export
 #' @import data.table Matrix
 #' 
-normaliseDGE <- function(dge, verbose=FALSE, center=TRUE, scale=TRUE, threshold = 5, min_library_size=50, gene_subset=0.5){
+normaliseDGE <- function(dge, verbose=FALSE, center=TRUE, scale=TRUE, outliers = FALSE, threshold = 5, min_library_size=200, gene_subset=0.5){
   
   library_size <- colSums(dge)
   lib_size_correction_factor <- library_size / median(sqrt(library_size))
   dge <- t(t(dge) / lib_size_correction_factor) # sweep(dge, 2, , "/")
   
   # subset cells and genes
-  cell_subset <- library_size > min_library_size
+  cell_subset <- library_size >= min_library_size
   gene_mean <- rowMeans(dge[, cell_subset])
   gene_subset <- data.table(gene_mean, names(gene_mean))[order(-gene_mean)][1:round(length(gene_mean) * gene_subset)]$V2
   
@@ -232,13 +235,13 @@ normaliseDGE <- function(dge, verbose=FALSE, center=TRUE, scale=TRUE, threshold 
   stopifnot(sum(is.na(dge)) == 0)
   
   # assess degree of outliers
-  if(verbose){
+  if(outliers){
     max_by_cell <- apply(dge, 1, max)
     max_by_gene <- apply(dge, 2, max)
     plot(max_by_gene, main="Maximum expression value per gene", ylab="Maximum Expression", xlab="Gene Index (by mean expression)")
-    abline(h=10, col="red")
+    abline(h=threshold, col="red")
     plot(max_by_cell[], main="Maximum expression value per cell", ylab="Maximum Expression", xlab="Cell Index (by library size)")
-    abline(h=10, col="red")
+    abline(h=threshold, col="red")
   }
   
   # round down large values which could be due to small library size and normalisation OR low gene wise expression and scaling
