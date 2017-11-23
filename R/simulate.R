@@ -162,6 +162,8 @@ simulateDGE <- function(parameters, sparse=TRUE, cell_prefix = "cell", dge=TRUE,
 #' 
 #' @param outliers logical; calculate max value per gene and cell to assess threshold position
 #' 
+#' @param transformation character; either sqrt (default) or asinh
+#' 
 #' @return A matrix of read counts
 #'
 #' @examples
@@ -183,7 +185,12 @@ normaliseDGE <- function(dge, verbose=FALSE, center=TRUE, scale=TRUE, outliers =
   dge <- dge[gene_subset, cell_subset]
   
   # multiply & sqrt
-  dge <- sqrt(10000 * dge)
+  if (transformation=="asinh"){
+  	  dge <- asinh(10000 * dge)
+  } else{
+  	  dge <- sqrt(10000 * dge)
+  }
+
   
   # transpose so cells are rows
   dge <- t(dge)
@@ -204,8 +211,11 @@ normaliseDGE <- function(dge, verbose=FALSE, center=TRUE, scale=TRUE, outliers =
   }
   
   # scale to unit variance all columns (genes) - don't center so 0 values remain exactly 0 and all data >= 0
-  #dge <- scale(dge, center = center, scale = scale)
+  if (center==TRUE){
   
+    dge <- scale(dge, center = TRUE, scale = TRUE)
+  
+  } else{
   colSdColMeans <- function(x, na.rm=TRUE) {
     if (na.rm) {
       n <- colSums(!is.na(x)) # thanks @flodel
@@ -217,6 +227,9 @@ normaliseDGE <- function(dge, verbose=FALSE, center=TRUE, scale=TRUE, outliers =
   }
   
   dge <- t(t(dge) / colSdColMeans(dge)) #, na.rm=TRUE
+  
+  }
+  
   dge <- dge[, !is.na(colSums(dge))] # remove NA genes (sd calculation fails if all 0s)
   
   if(verbose){
