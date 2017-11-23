@@ -171,12 +171,12 @@ simulateDGE <- function(parameters, sparse=TRUE, cell_prefix = "cell", dge=TRUE,
 #' @export
 #' @import data.table Matrix
 #' 
-normaliseDGE <- function(dge, verbose=FALSE, center=TRUE, scale=TRUE, outliers = FALSE, threshold = 5, min_library_size=200, gene_subset=0.5){
+normaliseDGE <- function(dge, verbose=FALSE, center=TRUE, scale=TRUE, outliers = FALSE, threshold = 5, min_library_size=200, gene_subset=0.5, transformation="sqrt"){
   
   library_size <- colSums(dge)
   lib_size_correction_factor <- library_size / median(sqrt(library_size))
   dge <- t(t(dge) / lib_size_correction_factor) # sweep(dge, 2, , "/")
-  
+
   # subset cells and genes
   cell_subset <- library_size >= min_library_size
   gene_mean <- rowMeans(dge[, cell_subset])
