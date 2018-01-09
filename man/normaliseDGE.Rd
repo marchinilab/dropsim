@@ -5,19 +5,27 @@
 \title{Normalise Digital Gene Expression Matrix}
 \usage{
 normaliseDGE(dge, verbose = FALSE, center = TRUE, scale = TRUE,
-  threshold = 5, min_library_size = 1)
+  outliers = FALSE, threshold = 5, min_library_size = 200,
+  gene_subset = 0.5, transformation = "sqrt")
 }
 \arguments{
-\item{dge}{matrix; a digital gene expression matrix containing count data}
+\item{dge}{matrix; a digital gene expression matrix containing count data (columns = cells, rows = genes), can be a sparce Matrix object.}
 
 \item{verbose}{logical; if TRUE the function will print diagnostic graphs along the way}
 
 \item{center}{logical; if true genes are centered to mean of 0}
 
-\item{scale}{logical; if TRUE genes are scaled to unit variance
-(If sparse=FALSE, setting dge=FALSE can save time on larger datasets.)}
+\item{scale}{logical; if TRUE genes are scaled to unit variance}
 
-\item{threshold}{integer; any values larger than this will be rounded down}
+\item{outliers}{logical; calculate max value per gene and cell to assess threshold position}
+
+\item{threshold}{integer; any normalised values larger than this will be rounded down}
+
+\item{min_library_size}{real; only cells with library size equal or greater to this will be kept}
+
+\item{gene_subset}{real; what fraction of the genes do you want to keep (by mean) e.g. 0.5 is top half most expressed}
+
+\item{transformation}{character; either sqrt (default) or asinh}
 }
 \value{
 A matrix of read counts
