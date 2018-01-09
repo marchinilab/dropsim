@@ -1,24 +1,24 @@
 #' An S4 class to hold simulation parameters.
 #'
 #' @slot n_genes integer; number of genes to simulate
-#' 
+#'
 #' @slot n_cells integer; number of cells to simulate
-#' 
+#'
 #' @slot gene_meanlog numeric; meanlog of lognormal distribution to simulate means from, see ?rlnorm for more details
-#' 
+#'
 #' @slot gene_sdlog numeric; sdlog of lognormal distribution to simulate means from, see ?rlnorm for more details
-#' 
+#'
 #' @slot library_meanlog numeric; meanlog of lognormal distribution to simulate library sizes from, see ?rlnorm for more details
-#' 
+#'
 #' @slot library_sdlog numeric; sdlog of lognormal distribution to simulate library sizes from, see ?rlnorm for more details
-#' 
+#'
 #' @slot groups data.table with variables 'scale', 'cells' and 'names'
 #' scale is a numeric vector of the scale parameter for the logistic distribution to simulate the fold changes from
 #' cells is a list of integer vector giving the indexes of cells each differential expression should be applied to, cells can be a member of more than one group
 #' names is a character vector of cell group names
 
 dropsim_parameters <- setClass("dropsim_parameters",
-                                 
+
                                  slots = list(n_genes = "integer",
                                               n_cells = "integer",
                                               gene_meanlog = "numeric",
@@ -26,7 +26,7 @@ dropsim_parameters <- setClass("dropsim_parameters",
                                               library_meanlog = "numeric",
                                               library_sdlog = "numeric",
                                               groups = "data.table"),
-                                 
+
                                  prototype = list(n_genes = 10000L,
                                                   n_cells = 500L,
                                                   gene_meanlog = -2.5,
@@ -50,14 +50,14 @@ dropsim_parameters <- setClass("dropsim_parameters",
 #' @param parameters object of class dropsim containing parameters
 #'
 #' @param sparse logical; if true the counts are returned as a sparse matrix
-#' 
+#'
 #' @param dge logical; if false counts a returned as a matrix cells by genes rather than genes by cells
 #' (If sparse=FALSE, setting dge=FALSE can save time on larger datasets.)
-#' 
+#'
 #' @param cell_prefix character; the default group name for cells
-#' 
+#'
 #' @param seed integer; seed for random number generation, set this for repoduciable simulations.
-#' 
+#'
 #' @return A list containing a matrix of read counts, true underlying expression values,
 #' fold change in expression for the groups simulated, and the seed used for random number generation.
 #'
@@ -68,71 +68,71 @@ dropsim_parameters <- setClass("dropsim_parameters",
 #' @import data.table Matrix
 
 simulateDGE <- function(parameters, sparse=TRUE, cell_prefix = "cell", dge=TRUE, seed=NULL){
-  
+
   if (class(parameters)!="dropsim_parameters") stop("parameters should be a 'dropsim_parameters' object")
-  
+
   if (is.null(seed)){
-    seed <- sample.int(2^20, 1)  
+    seed <- sample.int(2^20, 1)
   }
   set.seed(seed)
 
   true_expression_vector <- signif(rlnorm(n = parameters@n_genes,
                                    meanlog = parameters@gene_meanlog,
-                                   sdlog = parameters@gene_sdlog)) # rounding for cross-OS repoducibility
-  
+                                   sdlog = parameters@gene_sdlog)) # rounding for cross-OS reproducibility
+
   true_expression <- matrix(rep(true_expression_vector,
                                 times = parameters@n_cells),
                             ncol = parameters@n_cells)
-  
+
   library_sizes <- as.integer(rlnorm(n = parameters@n_cells,
                           meanlog = parameters@library_meanlog,
                           sdlog = parameters@library_sdlog))
-  
+
   colnames(true_expression) <- rep(cell_prefix, parameters@n_cells)
-  
+
   fold_change_matrix <- matrix(nrow=parameters@n_genes, ncol=length(parameters@groups$scale))
   colnames(fold_change_matrix) <- parameters@groups$names
   names(dimnames(fold_change_matrix)) <- c("gene", "group")
-  
+
   for (group in seq_along(parameters@groups$scale)){
-    
+
     cell_indexes <- parameters@groups$cells[[group]]
-    
+
     # simulate fold changes for the groupings
     fold_change_matrix[,group] <- signif(exp(rlogis(n = parameters@n_genes,
                                              location = 0.0,
-                                             scale = parameters@groups$scale[group]))) # rounding for cross-OS repoducibility
-    
+                                             scale = parameters@groups$scale[group]))) # rounding for cross-OS reproducibility
+
     # apply differential expression
     true_expression[, cell_indexes] <- true_expression[, cell_indexes] * (matrix(rep(fold_change_matrix[,group], times = length(cell_indexes)),
                                                                      ncol = length(cell_indexes)))
-    
+
     colnames(true_expression)[cell_indexes] <- paste0(colnames(true_expression)[cell_indexes],
                                                  parameters@groups$names[group])
-    
+
   }
-  
+
   # Convert means to counts
-  
+
   true_expression_t <- t(true_expression)
-  
+
   corrected_means <- true_expression_t * (library_sizes / rowSums(true_expression_t))
-  
+
   counts <- Matrix(rpois(parameters@n_cells * parameters@n_genes, lambda = corrected_means),
                    nrow = parameters@n_cells, ncol = parameters@n_genes, sparse = sparse)
-  
+
   # add labels to counts
   colnames(counts) <- 1:parameters@n_genes
   rownames(counts) <- rownames(true_expression_t)
   names(dimnames(counts)) <- c("cell","gene")
-  
+
   names(true_expression_vector) <- 1:parameters@n_genes
   rownames(fold_change_matrix) <- 1:parameters@n_genes
-  
-  if (dge == TRUE){  
+
+  if (dge == TRUE){
     counts <- t(counts)
   }
-  
+
   return(list(counts = counts,
               true_expression = true_expression_vector,
               fold_change = fold_change_matrix,
@@ -143,36 +143,36 @@ simulateDGE <- function(parameters, sparse=TRUE, cell_prefix = "cell", dge=TRUE,
 
 #' Normalise Digital Gene Expression Matrix
 #'
-#' \code{normaliseDGE} simulate digital gene expression matrix containing count data from given parameters
+#' \code{normaliseDGE} normalise a gene by cell matrix
 #'
 #'
 #' @param dge matrix; a digital gene expression matrix containing count data (columns = cells, rows = genes), can be a sparce Matrix object.
 #'
 #' @param center logical; if true genes are centered to mean of 0
-#' 
+#'
 #' @param scale logical; if TRUE genes are scaled to unit variance
-#' 
+#'
 #' @param threshold integer; any normalised values larger than this will be rounded down
-#' 
+#'
 #' @param gene_subset real; what fraction of the genes do you want to keep (by mean) e.g. 0.5 is top half most expressed
-#' 
+#'
 #' @param min_library_size real; only cells with library size equal or greater to this will be kept
-#' 
+#'
 #' @param verbose logical; if TRUE the function will print diagnostic graphs along the way
-#' 
+#'
 #' @param outliers logical; calculate max value per gene and cell to assess threshold position
-#' 
+#'
 #' @param transformation character; either sqrt (default) or asinh
-#' 
+#'
 #' @return A matrix of read counts
 #'
 #' @examples
 #' # normalised_counts <- normalise_dge(dge)
 #' @export
 #' @import data.table Matrix
-#' 
+#'
 normaliseDGE <- function(dge, verbose=FALSE, center=TRUE, scale=TRUE, outliers = FALSE, threshold = 5, min_library_size=200, gene_subset=0.5, transformation="sqrt"){
-  
+
   library_size <- colSums(dge)
   lib_size_correction_factor <- library_size / median(sqrt(library_size))
   dge <- t(t(dge) / lib_size_correction_factor) # sweep(dge, 2, , "/")
@@ -181,9 +181,9 @@ normaliseDGE <- function(dge, verbose=FALSE, center=TRUE, scale=TRUE, outliers =
   cell_subset <- library_size >= min_library_size
   gene_mean <- rowMeans(dge[, cell_subset])
   gene_subset <- data.table(gene_mean, names(gene_mean))[order(-gene_mean)][1:round(length(gene_mean) * gene_subset)]$V2
-  
+
   dge <- dge[gene_subset, cell_subset]
-  
+
   # multiply & sqrt
   if (transformation=="asinh"){
   	  dge <- asinh(10000 * dge)
@@ -191,14 +191,14 @@ normaliseDGE <- function(dge, verbose=FALSE, center=TRUE, scale=TRUE, outliers =
   	  dge <- sqrt(10000 * dge)
   }
 
-  
+
   # transpose so cells are rows
   dge <- t(dge)
-  
+
   # check everything looks ok
   if(verbose){
     str(dge)
-    
+
     if(prod(dim(dge))>1e6){
       tmp <- sample(dge, 1e6)
     } else if(prod(dim(dge))<1e6 & class(dge)=="dgCMatrix"){
@@ -206,15 +206,15 @@ normaliseDGE <- function(dge, verbose=FALSE, center=TRUE, scale=TRUE, outliers =
     } else{
       tmp <- dge
     }
-    
+
     hist(tmp, breaks = 2000, ylim = c(0, 1e3), xlim=c(0,50), xlab="Expression", main="Histogram of data post cell-wise (& sqrt) normalisation")
   }
-  
+
   # scale to unit variance all columns (genes) - don't center so 0 values remain exactly 0 and all data >= 0
   if (center==TRUE){
-  
+
     dge <- scale(dge, center = TRUE, scale = TRUE)
-  
+
   } else{
   colSdColMeans <- function(x, na.rm=TRUE) {
     if (na.rm) {
@@ -225,13 +225,13 @@ normaliseDGE <- function(dge, verbose=FALSE, center=TRUE, scale=TRUE, outliers =
     colVar <- colMeans(x*x, na.rm=na.rm) - (colMeans(x, na.rm=na.rm))^2
     return(sqrt(colVar * n/(n-1)))
   }
-  
+
   dge <- t(t(dge) / colSdColMeans(dge)) #, na.rm=TRUE
-  
+
   }
-  
+
   dge <- dge[, !is.na(colSums(dge))] # remove NA genes (sd calculation fails if all 0s)
-  
+
   if(verbose){
     if(prod(dim(dge))>1e6){
       tmp <- sample(dge, 1e6)
@@ -240,13 +240,13 @@ normaliseDGE <- function(dge, verbose=FALSE, center=TRUE, scale=TRUE, outliers =
     }else{
       tmp <- dge
     }
-    
+
     hist(tmp, breaks = 2000, ylim = c(0, 1e4), main="Histogram of data post gene-wise normalisation")
     }
-  
+
   # make sure no NA values left
   stopifnot(sum(is.na(dge)) == 0)
-  
+
   # assess degree of outliers
   if(outliers){
     max_by_cell <- apply(dge, 1, max)
@@ -256,12 +256,12 @@ normaliseDGE <- function(dge, verbose=FALSE, center=TRUE, scale=TRUE, outliers =
     plot(max_by_cell[], main="Maximum expression value per cell", ylab="Maximum Expression", xlab="Cell Index (by library size)")
     abline(h=threshold, col="red")
   }
-  
+
   # round down large values which could be due to small library size and normalisation OR low gene wise expression and scaling
   sum(dge > threshold)
   dge[dge > threshold] <- threshold
   dge[dge < (-threshold)] <- (-threshold)
-  
+
   if(verbose){
     if(prod(dim(dge)) > 1e6){
       tmp <- sample(dge, 1e6)
@@ -270,12 +270,12 @@ normaliseDGE <- function(dge, verbose=FALSE, center=TRUE, scale=TRUE, outliers =
     }else{
       tmp <- dge
     }
-    
+
     hist(tmp, breaks = 500, ylim = c(0, 1e3), main="Histogram of final data", xlab="Expression")
-    
+
     # check everything looks ok
     str(dge)
   }
-  
+
   return(dge)
 }
