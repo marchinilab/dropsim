@@ -1,6 +1,6 @@
-Package: sinsynthr
+Package: dropsim
 Type: Package
-Title: sinsynthr: Single Cell RNAseq synthetic data simulator
+Title: dropsim: Single Cell RNAseq simulator for droplet technology
 Version: 1.0
 Date: 2017-04-15
 Authors@R: c(

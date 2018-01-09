@@ -1,4 +1,4 @@
-sinsynthr: Single Cell RNA-seq Synthetic Data Simulator
+dropsim: Single Cell RNA-seq Simulator
 ================
 Daniel Wells
 2017-06-08
@@ -17,9 +17,9 @@ Simple Example
 --------------
 
 ``` r
-library(sinsynthr)
+library(dropsim)
 
-new_parameters <- new("sinsynthr_parameters",
+new_parameters <- new("dropsim_parameters",
                       n_genes = 15000L,
                       n_cells = 1000L,
                       gene_meanlog = -2.54,
@@ -83,7 +83,7 @@ Comparisons
 If we have multiple datasets we can do comparisons
 
 ``` r
-summarised_dge_2 <- summariseDGE(simulateDGE(sinsynthr_parameters())$counts, name="Simulation 2")
+summarised_dge_2 <- summariseDGE(simulateDGE(dropsim_parameters())$counts, name="Simulation 2")
 dispersionDGE(rbind(summarised_dge, summarised_dge_2)) + facet_wrap(~Name)
 ```
 
@@ -104,7 +104,7 @@ new_parameters <- fit_parameters(dge)
 print(new_parameters)
 ```
 
-    ## An object of class "sinsynthr_parameters"
+    ## An object of class "dropsim_parameters"
     ## Slot "n_genes":
     ## [1] 15000
     ## 

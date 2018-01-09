@@ -1,4 +1,4 @@
-# sinsynthr: Single Cell RNAseq Synthetic Data Simulator
+# dropsim: Single Cell RNAseq Simulator
 
 This is an R package for quickly simulating single cell RNAseq read count data. The model is based on data from droplet based methods, for other methods [Splatter](https://github.com/Oshlack/splatter) may be better suited. Sinsynthr shares a similar core model to Splatter but is overall much simpler.
 
@@ -6,15 +6,15 @@ This is an R package for quickly simulating single cell RNAseq read count data. 
 
 ```R
 # install.packages("devtools")
-devtools::install_github("marchinilab/sinsynthr")
+devtools::install_github("marchinilab/dropsim")
 ```
 
 ## Quick Start
 ```R
-library(sinsynthr)
+library(dropsim)
 
 # Use default parameters
-new_parameters <- sinsynthr_parameters()
+new_parameters <- dropsim_parameters()
 
 # Simulate counts
 simulation <- simulateDGE(new_parameters)

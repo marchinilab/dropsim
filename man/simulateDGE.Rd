@@ -8,7 +8,7 @@ simulateDGE(parameters, sparse = TRUE, cell_prefix = "cell", dge = TRUE,
   seed = NULL)
 }
 \arguments{
-\item{parameters}{object of class sinsynthr containing parameters}
+\item{parameters}{object of class dropsim containing parameters}
 
 \item{sparse}{logical; if true the counts are returned as a sparse matrix}
 
@@ -27,6 +27,6 @@ fold change in expression for the groups simulated, and the seed used for random
 \code{simulateDGE} simulate digital gene expression matrix containing count data from given parameters
 }
 \examples{
-# new_parameters <- sinsynthr_parameters()
+# new_parameters <- dropsim_parameters()
 # dge <- simulate(new_parameters)
 }

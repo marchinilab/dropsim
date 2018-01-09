@@ -12,7 +12,7 @@ fit_parameters(data, plot = TRUE, method = "mge", ...)
 \item{plot}{logical; if TRUE the real vs theoretical distribution plots qqplot etc. are printed}
 }
 \value{
-An object of class sinsynthr_parameters containing fitted parameters for the mean and library size lognormal distributions
+An object of class dropsim_parameters containing fitted parameters for the mean and library size lognormal distributions
 }
 \description{
 \code{fit_parameters} find parameters from data to simulate new dataset

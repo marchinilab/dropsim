@@ -1,17 +1,17 @@
 ---
-title: "sinsynthr: Single Cell RNA-seq Synthetic Data Simulator"
+title: "dropsim: Single Cell RNA-seq Simulator"
 author: "Daniel Wells"
 date: "`r Sys.Date()`"
 output: github_document #rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{sinsynthr: Single Cell RNA-seq Synthetic Data Simulator}
+  %\VignetteIndexEntry{dropsim: Single Cell RNA-seq Synthetic Data Simulator}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
 ```{r, include=FALSE}
 devtools::load_all()
-library(sinsynthr)
+library(dropsim)
 library(data.table)
 library(Matrix)
 library(ggplot2)
@@ -36,9 +36,9 @@ A realistic differential expression profile between cell types can be simulated 
 ## Simple Example
 
 ```{r simulate}
-library(sinsynthr)
+library(dropsim)
 
-new_parameters <- new("sinsynthr_parameters",
+new_parameters <- new("dropsim_parameters",
                       n_genes = 15000L,
                       n_cells = 1000L,
                       gene_meanlog = -2.54,
@@ -85,7 +85,7 @@ qplot(dge_pca$x[,1], dge_pca$x[,2], colour=rownames(dge_pca$x)) + labs(colour="G
 ## Comparisons
 If we have multiple datasets we can do comparisons
 ```{r compare, fig.width=9, fig.height=6, warning=FALSE}
-summarised_dge_2 <- summariseDGE(simulateDGE(sinsynthr_parameters())$counts, name="Simulation 2")
+summarised_dge_2 <- summariseDGE(simulateDGE(dropsim_parameters())$counts, name="Simulation 2")
 dispersionDGE(rbind(summarised_dge, summarised_dge_2)) + facet_wrap(~Name)
 ```
 

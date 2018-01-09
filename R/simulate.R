@@ -17,7 +17,7 @@
 #' cells is a list of integer vector giving the indexes of cells each differential expression should be applied to, cells can be a member of more than one group
 #' names is a character vector of cell group names
 
-sinsynthr_parameters <- setClass("sinsynthr_parameters",
+dropsim_parameters <- setClass("dropsim_parameters",
                                  
                                  slots = list(n_genes = "integer",
                                               n_cells = "integer",
@@ -47,7 +47,7 @@ sinsynthr_parameters <- setClass("sinsynthr_parameters",
 #' \code{simulateDGE} simulate digital gene expression matrix containing count data from given parameters
 #'
 #'
-#' @param parameters object of class sinsynthr containing parameters
+#' @param parameters object of class dropsim containing parameters
 #'
 #' @param sparse logical; if true the counts are returned as a sparse matrix
 #' 
@@ -62,14 +62,14 @@ sinsynthr_parameters <- setClass("sinsynthr_parameters",
 #' fold change in expression for the groups simulated, and the seed used for random number generation.
 #'
 #' @examples
-#' # new_parameters <- sinsynthr_parameters()
+#' # new_parameters <- dropsim_parameters()
 #' # dge <- simulate(new_parameters)
 #' @export
 #' @import data.table Matrix
 
 simulateDGE <- function(parameters, sparse=TRUE, cell_prefix = "cell", dge=TRUE, seed=NULL){
   
-  if (class(parameters)!="sinsynthr_parameters") stop("parameters should be a 'sinsynthr_parameters' object")
+  if (class(parameters)!="dropsim_parameters") stop("parameters should be a 'dropsim_parameters' object")
   
   if (is.null(seed)){
     seed <- sample.int(2^20, 1)  

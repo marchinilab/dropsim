@@ -7,7 +7,7 @@
 #' 
 #' @param plot logical; if TRUE the real vs theoretical distribution plots qqplot etc. are printed
 #' 
-#' @return An object of class sinsynthr_parameters containing fitted parameters for the mean and library size lognormal distributions
+#' @return An object of class dropsim_parameters containing fitted parameters for the mean and library size lognormal distributions
 #'
 #' @examples
 #' # new_parameters <- fit_parameters(your_data_matrix)
@@ -35,7 +35,7 @@ fit_parameters <- function(data, plot=TRUE, method="mge", ...){
   plot(library_parameters)
   mtext("Library Size fits", outer = TRUE, cex = 1.5)
   
-  new_parameters <- new("sinsynthr_parameters",
+  new_parameters <- new("dropsim_parameters",
                         n_genes = nrow(data),
                         n_cells = ncol(data),
                         gene_meanlog = lnorm_parameters$estimate["meanlog"],
