@@ -12,6 +12,8 @@ Imports:
 	ggplot2,
 	Matrix,
 	cowplot,
+	mltools,
+	RColorBrewer,
 	fitdistrplus
 RoxygenNote: 6.0.1
 Suggests:

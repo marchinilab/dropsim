@@ -192,7 +192,8 @@ plot_grid(histogramDGE(data),
 #'
 #' @export
 #' @importFrom mltools empirical_cdf
-#' @importFrom cowplot plot_grid
+#' @importFrom RColorBrewer brewer.pal
+#' @importFrom cowplot plot_grid ggdraw draw_label
 compare_distributions <- function(data, limits=NULL, quantity="Data", title=NULL){
 
   comp <- data
@@ -211,9 +212,8 @@ compare_distributions <- function(data, limits=NULL, quantity="Data", title=NULL
     empirical_range <- limits
   }
 
-  library(mltools)
   comp_tidy <- melt(comp, id.vars = empirical_variable, variable.name = "Model")
-  ecdf_mltools <- apply(comp, 2, function(x) mltools::empirical_cdf(x, ubounds=comp[,1][[1]]))
+  ecdf_mltools <- apply(comp, 2, function(x) empirical_cdf(x, ubounds=comp[,1][[1]])) #mltools::
 
   ecdf_ml <- data.table(upperbound = ecdf_mltools[[1]]$UpperBound)
   for (i in 1:length(ecdf_mltools)){

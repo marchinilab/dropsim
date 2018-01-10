@@ -31,7 +31,7 @@ normaliseDGE(dge, verbose = FALSE, center = TRUE, scale = TRUE,
 A matrix of read counts
 }
 \description{
-\code{normaliseDGE} simulate digital gene expression matrix containing count data from given parameters
+\code{normaliseDGE} normalise a gene by cell matrix
 }
 \examples{
 # normalised_counts <- normalise_dge(dge)
