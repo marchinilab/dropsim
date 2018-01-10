@@ -29,7 +29,7 @@ dropsim_parameters <- setClass("dropsim_parameters",
 
                                  prototype = list(n_genes = 10000L,
                                                   n_cells = 500L,
-                                                  gene_meanlog = -2.5,
+                                                  gene_meanlog = -12.5,
                                                   gene_sdlog = 2.25,
                                                   library_meanlog = 9.5,
                                                   library_sdlog = 0.35,

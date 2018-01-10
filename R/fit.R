@@ -18,7 +18,7 @@
 fit_parameters <- function(data, plot=TRUE, method="mge", ...){
   # Dropseq normalise to estimate mean dist params
   library_sizes <- colSums(data)
-  normalised_counts <- sweep(data, 2, library_sizes / median(sqrt(library_sizes)), "/")
+  normalised_counts <- sweep(data, 2, library_sizes , "/") #/ median(sqrt(library_sizes))
   normalised_counts <- normalised_counts[rowSums(normalised_counts > 0) >= 1, ]
 
   # Fit gene mean parameters
