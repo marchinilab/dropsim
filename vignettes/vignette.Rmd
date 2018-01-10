@@ -10,6 +10,7 @@ vignette: >
 ---
 
 ```{r, include=FALSE}
+# rmarkdown::render("vignettes/vignette.Rmd")
 devtools::load_all()
 library(dropsim)
 library(data.table)
@@ -25,10 +26,12 @@ knitr::opts_chunk$set(fig.width=10)
 
 This is a package for simulating single cell RNAseq data. The target is a digital gene expression matrix counts matrix C (N cells by L genes). If cells, genes, and cell types are indexed by n, l, and t respectively then:
 
-$C_{nl} = \mathit{Poisson}\big(
+$$
+C_{nl} = \mathit{Poisson}\big(
           \frac{e_{t(n)l}}{\sum_{l=1}^{L} e_{t(n)l}} \
           s_n
-          \big)$
+          \big)
+$$
 
 Where e is the true baseline expression and s is the library size, each of which are drawn from a lognormal distribution.
 A realistic differential expression profile between cell types can be simulated by multiplying the baseline expression values e by a log-logistic distribution.
@@ -37,15 +40,16 @@ A realistic differential expression profile between cell types can be simulated 
 
 ```{r simulate}
 library(dropsim)
+set.seed(42)
 
 new_parameters <- new("dropsim_parameters",
                       n_genes = 15000L,
                       n_cells = 1000L,
-                      gene_meanlog = -2.54,
-                      gene_sdlog = 2.36,
-                      library_meanlog = 9.57,
-                      library_sdlog = 0.36,
-                      groups = data.table(
+                      gene_meanlog = -12,
+                      gene_sdlog = 2.5,
+                      library_meanlog = 10,
+                      library_sdlog = 0.4,
+                      groups = data.table::data.table(
                         scale = c(0.06,0.06,0.06,0.04),
                         cells = list(1:200, 201:600, 601:620, sample.int(1000, size=100, replace = TRUE)),
                         names = c("A","B","C","2")
@@ -53,7 +57,7 @@ new_parameters <- new("dropsim_parameters",
                       )
 
 # Simulate counts
-dge <- simulateDGE(new_parameters)$counts
+dge <- simulateDGE(new_parameters, seed = 42)$counts
 
 str(as.matrix(dge))
 ```
@@ -61,7 +65,7 @@ str(as.matrix(dge))
 
 ## Summary Plots
 We can then calculate gene-wise summaries and visualise the simulated dataset
-```{r summary, fig.width=9, fig.height=6, warning=FALSE}
+```{r summary, fig.width=10, fig.height=6, warning=FALSE}
 # Summarise Counts matrix
 summarised_dge <- summariseDGE(dge, name="Simulation 1")
 
@@ -85,13 +89,13 @@ qplot(dge_pca$x[,1], dge_pca$x[,2], colour=rownames(dge_pca$x)) + labs(colour="G
 ## Comparisons
 If we have multiple datasets we can do comparisons
 ```{r compare, fig.width=9, fig.height=6, warning=FALSE}
-summarised_dge_2 <- summariseDGE(simulateDGE(dropsim_parameters())$counts, name="Simulation 2")
+summarised_dge_2 <- summariseDGE(simulateDGE(dropsim_parameters(), seed=42)$counts, name="Simulation 2")
 dispersionDGE(rbind(summarised_dge, summarised_dge_2)) + facet_wrap(~Name)
 ```
 
 ## Simulate based on dataset
 If you have data you want to match the properties of you can create parameters from them
-```{r fit, fig.width=9, fig.height=6}
+```{r fit, fig.width=9, fig.height=6, warning=FALSE}
 new_parameters <- fit_parameters(dge)
 print(new_parameters)
 ```
