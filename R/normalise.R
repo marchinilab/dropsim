@@ -52,10 +52,7 @@ normaliseDGE <- function(dge, verbose=FALSE, center=TRUE, scale=TRUE, outliers =
   # transpose so cells are rows
   dge <- t(dge)
 
-  # check everything looks ok
-  if(verbose){
-    str(dge)
-
+  sample_dge <- function(dge){
     if(prod(dim(dge))>1e6){
       tmp <- sample(dge, 1e6)
     } else if(prod(dim(dge))<1e6 & class(dge)=="dgCMatrix"){
@@ -63,8 +60,14 @@ normaliseDGE <- function(dge, verbose=FALSE, center=TRUE, scale=TRUE, outliers =
     } else{
       tmp <- dge
     }
+    return(tmp)
+  }
 
-    hist(tmp, breaks = 2000, ylim = c(0, 1e3), xlim=c(0,50), xlab="Expression", main="Histogram of data post cell-wise (& sqrt) normalisation")
+  # check everything looks ok
+  if(verbose){
+    str(dge)
+
+    hist(sample_dge(dge), breaks = 2000, ylim = c(0, 1e3), xlim=c(0,50), xlab="Expression", main="Histogram of data post cell-wise (& sqrt) normalisation")
   }
 
   # scale to unit variance all columns (genes) - don't center so 0 values remain exactly 0 and all data >= 0
@@ -90,15 +93,7 @@ normaliseDGE <- function(dge, verbose=FALSE, center=TRUE, scale=TRUE, outliers =
   dge <- dge[, !is.na(colSums(dge))] # remove NA genes (sd calculation fails if all 0s)
 
   if(verbose){
-    if(prod(dim(dge))>1e6){
-      tmp <- sample(dge, 1e6)
-    }else if(prod(dim(dge))<1e6 & class(dge)=="dgCMatrix"){
-      tmp <- as.matrix(dge)
-    }else{
-      tmp <- dge
-    }
-
-    hist(tmp, breaks = 2000, ylim = c(0, 1e4), main="Histogram of data post gene-wise normalisation")
+    hist(sample_dge(dge), breaks = 2000, ylim = c(0, 1e4), main="Histogram of data post gene-wise normalisation")
     }
 
   # make sure no NA values left
@@ -120,15 +115,7 @@ normaliseDGE <- function(dge, verbose=FALSE, center=TRUE, scale=TRUE, outliers =
   dge[dge < (-threshold)] <- (-threshold)
 
   if(verbose){
-    if(prod(dim(dge)) > 1e6){
-      tmp <- sample(dge, 1e6)
-    }else if(prod(dim(dge)) < 1e6 & class(dge)=="dgCMatrix"){
-      tmp <- as.matrix(dge)
-    }else{
-      tmp <- dge
-    }
-
-    hist(tmp, breaks = 500, ylim = c(0, 1e3), main="Histogram of final data", xlab="Expression")
+    hist(sample_dge(dge), breaks = 500, ylim = c(0, 1e3), main="Histogram of final data", xlab="Expression")
 
     # check everything looks ok
     str(dge)
