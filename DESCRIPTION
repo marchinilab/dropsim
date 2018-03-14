@@ -1,7 +1,7 @@
 Package: dropsim
 Type: Package
 Title: dropsim: Single Cell RNAseq simulator for droplet technology
-Version: 1.0
+Version: 1.0.1
 Date: 2017-04-15
 Authors@R: c(
 	person("Daniel", "Wells", email = "wells@stats.ox.ac.uk", role = c("aut", "cre")))
