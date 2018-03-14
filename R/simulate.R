@@ -17,7 +17,7 @@
 #' cells is a list of integer vector giving the indexes of cells each differential expression should be applied to, cells can be a member of more than one group
 #' names is a character vector of cell group names
 #'
-#' @export
+#' @export dropsim_parameters
 
 dropsim_parameters <- setClass("dropsim_parameters",
 
